@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #define BUFSIZE 1000
+#define FIND_PATH "/usr/bin/find"
 
 /*
 useful references:
@@ -59,8 +61,8 @@ char *combine(char *de) {
 			(de[de_i + 1] & 0x80) != 0x80 ||
 			(de[de_i + 2] & 0x80) != 0x80 ||
 			(de[de_i + 3] & 0xe0) != 0xe0 ||
-            (de[de_i + 4] & 0x80) != 0x80 ||
-            (de[de_i + 5] & 0x80) != 0x80) continue;
+			(de[de_i + 4] & 0x80) != 0x80 ||
+			(de[de_i + 5] & 0x80) != 0x80) continue;
 		initial = (((de[de_i] & 0x0f) << 12) |
 			((de[de_i + 1] & 0x3f) << 6) |
 			((de[de_i + 2] & 0x3f) << 0)) - 0x1100;
@@ -71,8 +73,8 @@ char *combine(char *de) {
 		syl = initial * 588 + medial * 28 + 0xac00;
 		if (de_i < len - 8 &&
 			(de[de_i + 6] & 0xe0) == 0xe0 &&
-            (de[de_i + 7] & 0x80) == 0x80 &&
-            (de[de_i + 8] & 0x80) == 0x80) {
+			(de[de_i + 7] & 0x80) == 0x80 &&
+			(de[de_i + 8] & 0x80) == 0x80) {
 			final = (((de[de_i + 6] & 0x0f) << 12) |
 				((de[de_i + 7] & 0x3f) << 6) |
 				((de[de_i + 8] & 0x3f) << 0)) - 0x11a7;
@@ -94,6 +96,22 @@ char *combine(char *de) {
 
 int main(int argc, char **argv) {
 	int i = 1;
+	if (strlen(argv[0]) >= strlen("hfind") &&
+		!strcmp("hfind", argv[0] + strlen(argv[0]) - strlen("hfind"))) {
+		// find $(h "$@") has a problem.
+		char **newv = malloc(sizeof(char *) * (argc + 1));
+		if (newv == NULL) {
+			perror(argv[0]);
+			exit(1);
+		}
+		for (i = 0; i < argc; i++) {
+			newv[i] = decompose(argv[i]);
+		}
+		newv[argc] = NULL;
+		execve(FIND_PATH, newv, NULL);
+		perror(argv[0]);
+		exit(1);
+	}
 	if (argc > 1 && argv[1][0] == '-') {
 		if (!strcmp("-c", argv[1])) {
 			char buf[BUFSIZE];

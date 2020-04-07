@@ -3,6 +3,7 @@
 make the Korean (Hangul) filename `find`-friendly for Mac command-line users
 
 ```
+$ hfind . -name '*계약서*.pdf'
 $ find . -name $(h '*계약서*.pdf')
 $ find ~/Downloads -name `h "*리스트*"`
 $ h -h
