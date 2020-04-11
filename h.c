@@ -2,9 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
-#define BUFSIZE 1000
-#define FIND_PATH "/usr/bin/find"
+#include "h.h"
 
 /*
 useful references:
@@ -96,6 +94,14 @@ char *combine(char *de) {
 
 int main(int argc, char **argv) {
 	int i = 1;
+	if (argc > 2 && !strcmp("-z", argv[1])) {
+		int ret = zip(argv[2]);
+		if (ret != 0) {
+			perror(argv[0]);
+			exit(1);
+		}
+		exit(0);
+	}
 	if (strlen(argv[0]) >= strlen("hfind") &&
 		!strcmp("hfind", argv[0] + strlen(argv[0]) - strlen("hfind"))) {
 		// find $(h "$@") has a problem.
@@ -123,8 +129,9 @@ int main(int argc, char **argv) {
 			i++;
 		} else {
 			fprintf(stderr, "usage: %s text ... - convert text into the searchable (jamo-separated) form\n", argv[0]);
-			fprintf(stderr, "         -c       - (reverse) combine standard input into the normalized form\n");
-			fprintf(stderr, "         -h       - help\n");
+			fprintf(stderr, "         -c        - (reverse) combine standard input into the normalized form\n");
+			fprintf(stderr, "         -z filename - convert the zip file and backup\n");
+			fprintf(stderr, "         -h        - help\n");
 			exit(0);
 		}
 	}

@@ -1,8 +1,8 @@
 
 INSTALL_PATH = /usr/local/bin
 
-all:
-	gcc -Wall -O3 -o h h.c
+all: h.h h.c zip.c
+	gcc -Wall -O3 -o h h.c zip.c
 	cp h hfind
 
 install:
